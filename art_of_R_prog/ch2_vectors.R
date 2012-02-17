@@ -159,7 +159,7 @@ findud <- function(v) {
     # v <- diff(v)
     # return(sign(v))
 
-    return(ifelse(vud > 0, 1, -1))
+    return(ifelse(v > 0, 1, -1))
 }
 
 udcorr <- function(x, y) {
@@ -188,4 +188,3 @@ args(ifelse)
 # form subgroups according to gender
 grps <- list()
 for (gen in c('F', 'M', 'I')) grps[[gen]] <- which(g==gen)
-grps 
