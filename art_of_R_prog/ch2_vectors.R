@@ -187,4 +187,68 @@ args(ifelse)
 
 # form subgroups according to gender
 grps <- list()
+
+# more efficient approcach in Section 4.4
 for (gen in c('F', 'M', 'I')) grps[[gen]] <- which(g==gen)
+
+aba <- read.csv('abalone.csv', header=TRUE, as.is=TRUE)
+grps <- list()
+for (gen in c('M', 'F')) grps[[gen]] <- which(aba==gen)
+abam <- aba[grps$M,]
+abaf <- aba[grps$F,]
+plot(abam$Length, abam$Diameter)
+plot(abaf$Length, abaf$Diameter, pch='x', new=FALSE)
+
+# set plot character for each element
+pchvec <- ifelse(aba$Gender == 'M', 'o', 'x')
+plot(aba$Length, aba$Diameter, pch=pchvec)
+
+# *******************  2.10 Testing Vector Equality *************************
+# we want to test if two vectors are equal
+# the naive approach won't work
+x <- 1:3
+y <- c(1, 3, 4)
+x == y  # Returns a vector
+
+# To test all elements, use all()
+all(x==y)
+any(x==y)
+
+# Or even easier, use identical
+identical(x, y)
+
+# But be careful with this. Check out this vignette
+x <- 1:2
+y <- c(1,2)
+
+typeof(x)
+typeof(y)
+identical(x, y)  # returns false because they're different types
+    
+
+# *******************  2.11 Vector Element Names ****************************
+# The elements of a vector can be given names
+# For example, say we have a 50-element vector showing the population of each 
+# stat in the US. We could name each point in the vector. Could be useful in 
+# plots, etc
+
+# Use the names
+x <- c(1,2,4)
+names(x)  # NULL
+names(x) <- c('a', 'b', 'ab')
+
+# Remove names
+names(x) <- NULL
+
+# access by element name
+x['b']
+
+# *******************  2.12 More on c() *************************************
+
+v <- c(5, 2, 'abc')  # all go to str
+typeof(v)
+
+v <- c(5, 2, list(a=1, b=4))  # you get back one list
+typeof(v)
+
+v <- c(5, 2, c(3, 4))  # flattens out to one vector
