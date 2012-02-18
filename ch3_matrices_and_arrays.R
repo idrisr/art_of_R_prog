@@ -68,4 +68,47 @@ y[-2, ]  # exclude 2nd row
 
 require(pixmap)
 # is pic file included in library?
-mtrush1 <- read.pnm('mtrush.pgm')
+ml <- read.pnm('mona_lisa.pgm')
+plot(ml)
+str(ml)  # this is a S4 type, as you can tell from the @ instead of +
+# More on Ch 9 of s3 v s4
+
+# This is a matrix
+ml@grey[100, 200]
+plot(ml)
+locator()  # doesnt work because the windowing system isnt X11 or ???
+
+ml@grey[100:110, 100:110] <- 1
+plot(ml)
+
+blurpart <- function(img, rows, cols, q) {
+    # adds random noise to img, at the range rows, cols of img; img and the
+    # reutrn value are both objects of class pixmap; the parameter q controls
+    # the weight of the noise, with the result being 1-q times the original
+    # image plus q times the random noise
+    lrows <- length(rows)
+    lcols <- length(cols)
+    newimg <- img
+    # TODO: send typo correction to author
+    # TODO: send function correction to author
+    randomnoise <- matrix(nrow=lrows, ncol=lcols, runif(lrows*lcols))
+    newimg@grey[rows, cols] <- randomnoise
+    newimg@grey <- (1-q)*img@grey + q*newimg@grey
+    return(newimg)
+}
+
+# origin is at top left
+
+
+# give Ms. Lisa some anonymity
+rowstart <- 40
+rowsize <- 80
+colstart <- 93 
+colsize <- 55
+row <- rowstart:(rowstart + rowsize)
+col <- colstart:(colstart + colsize)
+q <- 0.3
+blur_ml <- blurpart(ml, row, col, q)
+plot(blur_ml)
+
+
