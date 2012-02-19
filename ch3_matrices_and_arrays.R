@@ -179,3 +179,166 @@ makecov <- function(rho, n) {
     m <- ifelse(row(m) == col(m), 1, rho)
     return(m)
 }
+
+cov <- makecov(0.2, 3)
+
+# *************************************************************************
+# ************* Ch 3.3 Applying Functions to Matrix Rows and Cols *********
+# *************************************************************************
+
+# One of the most *famous* and most used functions of R is the *apply() family
+# of functions, such as apply(), tapply(), and lapply(). 
+
+# Here we'll look at apply().
+
+
+# *************** Ch 3.3.1 Using the apply() Function ************************
+# General form for matrices
+apply(m, dimcode, f, fargs)
+
+# m is the matrix
+# dimcode is the dimension, 1 for rows, 2 for column, work for higher levels?
+# f is the function to be applied
+# fargs is an optional set of arguments to be supplied to f
+
+z <- matrix(1:6, nrow=3)
+
+# get mean of columns
+apply(z, 2, mean)
+
+# get mean of rows
+apply(z, 1, mean)
+
+# Our function f divides a two-element vector by the vector (2, 8)
+# Recycling would be used if x had a length longer than 2
+f <- function(x) x/c(2, 8)
+
+# Send each row of z to f
+y <- apply(z, 1, f)
+dim(z)  # 3x2
+dim(y)  # 2x3
+
+# A bit surprised to get back a 2x3 matrix? The first computation ends up in the
+# first column, the 2nd computation in the 2nd column, etc.
+
+# If the function to be applied returns a vector of k components, then the
+# result of apply() will have k rows. You can transpose the result if you want
+# with t()
+yt <- t(apply(z, 1, f))
+
+# If the function returns a scalar, apply will return a vector not a matrix
+
+# sometimes you need to pass additional arguments to your function in apply.
+# suppose we have a matrix of 1s and 0s and want to create a vector as follows:
+# For each row of the  matrix, the corresponding element of the vector will be
+# either 1 or 0, depending on whether the majority of the first d elements in
+# that row is 1 or 0. Here, d will be a parameter that we may wish to vary.
+
+# TODO: top of page 72. Not a typo, but could be confusing because the text
+# hasn't yet declared the function so a newb might wonder where the function
+# came from.
+
+copymaj <- function(rw, d) {
+    maj <- sum(rw[1:d]) / d
+    return(if(maj>0.5) 1 else 0)
+}
+x <- matrix(c(1, 1, 1, 0, 0, 1, 0, 1, 1, 1, 1 ,1, 0, 0, 1, 0), nrow=4)
+apply(x, 1, copymaj, 2)
+
+# Using apply will not generally speed up your code. The benefit is that it
+# makes for very compact code, which'll be easier to read and modify and all
+# that. And as R moves closer and closer to parallel processing, functions like
+# apply() become more important. 
+
+# For example, the clusterApply() function in the snow package gives R some
+# parallel-processing capability by distributing the submatrix data to various
+# network nodes, with each node basically applying the given function on its
+# submatrix.
+
+# *************** Ch 3.3.2 Extended Ex: Finding Outliers ***********************
+# we have retail data in matrix rs.  Each row of the data is for a different
+# store, and obs in the row are daily sales figures.
+
+# As a simple approach, let's write code to identify the most deviant
+# observation for each store. We'll define that as the observation furthest from
+# the median value for that store. 
+
+findols <- function(x) {
+    # nested functions common if inner function is short
+    findol <- function(xrow) {
+        mdn <- median(xrow)
+        devs <- abs(xrow - mdn)
+        return(which.max(devs))  # tells us where the max occurs
+    }
+    return(apply(x, 1, findol))
+}
+
+# *************************************************************************
+# ************* Ch 3.4 Adding and Deleting Matrix Rows and Columns ********
+# *************************************************************************
+# Technically matrices are of fixed length and dimensions so we can't add or
+# delete rows or columns. However, matrices can be reassigned, and thus we can
+# achieve the same effect as if we had directly done additions or deletions.
+
+# *************** Ch 3.4.1 Changing the size of a matrix ***********************
+# use rbind and cbind
+one <- rep(1, 4)
+z <- matrix(c(1:4, 1, 1, 0, 0, 1, 0, 1, 0), nrow=4)
+
+# Puts one on top of z
+cbind(one, z)
+
+# Can also do recycling
+cbind(1, z)
+
+# Be careful with rbind and cbind. They both reassign matrices, which is
+# expensive
+
+# If you're going to do a lot of binds, its best to pre-allocate the matrix, and
+# then do assignment
+
+# ***** Ch 3.4.2 Extended Ex: Finding closest pairs of vertices in a graph ****
+# Finding the distance between vertices in a graph is a common thing in comp
+# sci, stats and data science. This problem arises in some clustering algos and
+# genomics. 
+
+# Here we look at finding distances between two cities
+# Suppose we need a function that inputs a distance matrix, where the element in
+# row i, col j gives the distance between city i and city j and the outputs the
+# minimum one-hop distance between cities and the pair of cities that achieves
+# that minimum.
+
+# returns the minimum value of d[i, j], i != j, and the row/col attaining that
+# minimum, for square symmetric d; no special policy on ties
+
+# basically all this does is find the min in the square matrix and return its
+# index
+
+mind <- function(d) {
+    n <- nrow(d)
+    # add a column to identify row number for apply()
+    dd <- cbind(d, 1:n)
+    wmins <- apply(dd[-n,], 1, imin)
+    # wmins will be 2xn, 1st row being indices and 2nd being values
+    i <- which.min(wmins[2, ])
+    j <- wmins[1, i]
+    return(c(d[i, j], i, j))
+}
+
+# finds the location, value of the minimum in a row of x
+imin <- function(x) {
+    lx <- length(x)
+    i <- x[lx]  # original row number
+    j <- which.min(x[(i+1):(lx-1)])
+    k <- i + j
+    return(c(k, x[k]))
+}
+
+q <- matrix(c(0, 12, 13, 8, 20, 12, 0, 15, 28, 88, 13, 15, 0, 6, 9, 8, 28, 6, 0,
+              33, 20, 88, 9, 33, 0), nrow=5)
+# test for diagonal symmetry
+all(q == t(q))
+
+mind(q)
+
+# TODO: typo page 77, number one should be letter l. see notes in book
