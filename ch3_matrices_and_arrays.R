@@ -76,7 +76,7 @@ str(ml)  # this is a S4 type, as you can tell from the @ instead of +
 # This is a matrix
 ml@grey[100, 200]
 plot(ml)
-locator()  # doesnt work because the windowing system isnt X11 or ???
+# locator()  # doesnt work because the windowing system isnt X11 or ???
 
 ml@grey[100:110, 100:110] <- 1
 plot(ml)
@@ -101,13 +101,14 @@ blurpart <- function(img, rows, cols, q) {
 
 
 # give Ms. Lisa some anonymity
+ml <- read.pnm('mona_lisa.pgm')
 rowstart <- 40
 rowsize <- 80
 colstart <- 93 
 colsize <- 55
 row <- rowstart:(rowstart + rowsize)
 col <- colstart:(colstart + colsize)
-q <- 0.3
+q <- 0.6
 blur_ml <- blurpart(ml, row, col, q)
 plot(blur_ml)
 
@@ -154,7 +155,7 @@ a <- matrix(1:100, nrow=10)
 
 
 # TODO: this does not work. tell author, top of page 69
-row(a[2, 8])
+# row(a[2, 8])
 row(a)
 
 # Lets consider an example. When writing simulatinon code for multi-variate
@@ -194,7 +195,7 @@ cov <- makecov(0.2, 3)
 
 # *************** Ch 3.3.1 Using the apply() Function ************************
 # General form for matrices
-apply(m, dimcode, f, fargs)
+# apply(m, dimcode, f, fargs)
 
 # m is the matrix
 # dimcode is the dimension, 1 for rows, 2 for column, work for higher levels?
@@ -342,3 +343,84 @@ all(q == t(q))
 mind(q)
 
 # TODO: typo page 77, number one should be letter l. see notes in book
+# if minimal element in the matrix is unique, there is an alternate approach
+# that is far simpler
+minda <- function(d) {
+    smallest <- min(d)
+    ij <- which(d == smallest, arr.ind=TRUE)
+    return(c(smallest, ij))
+}
+
+# arr.ind =TRUE indicates index will be a matrix index
+minda(q)
+
+# *************************************************************************
+# ************* Ch 3.5 More on Vector/Matrix Distrinction *****************
+# *************************************************************************
+
+z <- matrix(1:8, nrow=4)
+length(z)
+class(z)
+attributes(z)
+# a matrix unlike a vector has the dim attribute
+# the $ sign shows you that it is a S3 class
+nrow(z)
+ncol(z)
+
+# *************************************************************************
+# ************* Ch 3.6 Avoiding Unintended Dimension Reduction ************
+# *************************************************************************
+
+z <- matrix(1:8, nrow=4)
+r <- z[2, ]  # in vector format, not matrix
+attributes(z)
+attributes(r)
+class(z)  # matrix
+class(r)  # integer
+str(z)
+str(r)
+
+# This could cause weird exceptions when doing matrix work. If your code for
+# some reason extracts a one row matrix, R will automatically make it a vector. 
+# The way around this is as follows:
+r <- z[2, , drop=FALSE]
+dim(r)  # matrix
+
+# For this reason, get in the habit of using drop=FALSE
+# you can pass drop because [ is just a function
+"["(z,3,2)
+
+# If you have a vector that you want to treat as a matrix, use as.matrix
+u <- 1:3
+v <- as.matrix(u)
+attributes(u)
+attributes(v)
+
+# *************************************************************************
+# ************* Ch 3.7 Naming Matrix Rows and Columns *********************
+# *************************************************************************
+
+# The natural way to refer to row and is by index, but you can also use names
+z <- matrix(1:4, nrow=2)
+colnames(z)
+colnames(z) <- c('a', 'b')
+z[, 'a']
+
+# *************************************************************************
+# ************* Ch 3.8 Higher Dimensional Arrays **************************
+# *************************************************************************
+
+# In a stats context, a matrix is 2 dimensional. Higher than that and you have
+# an array. 
+# 3 students, each test consists of two scores
+firsttest <- matrix(c(46, 21, 50, 30, 25, 50), nrow=3)
+secondtest <- matrix(c(46, 41, 50, 43, 35, 50), nrow=3)
+
+# Now lets both of those together into one data structure that'll have two
+# layers, one layer per test.
+
+# dim arg specifies 3 rows, 2 columns, 2 layers
+tests <- array(data=c(firsttest, secondtest), dim=c(3, 2, 2))
+attributes(tests)
+# 3rd student, 2nd part of test, 1st test
+tests[3, 2, 1]
