@@ -111,4 +111,71 @@ q <- 0.3
 blur_ml <- blurpart(ml, row, col, q)
 plot(blur_ml)
 
+# *************** Ch 3.2.4 Filtering on Matrices **********************
+# Filtering can be done with matrices, just as vectors. Be careful with syntax
+x <- matrix(c(1:3, 2:4), nrow=3)
 
+# return full row of x if the 2nd column of x is greater than or equal to 3
+x[x[, 2] >= 3,]
+
+# The filtering can be defined on a variable separate than the one to be
+# filtered
+
+z <- c(5, 12, 13)
+
+# return rows of x where rows of z is odd
+# 1 2 
+# 3 4
+
+# TODO: send author correction of example on top of page 68
+x[z %% 2 ==1, ]
+z %% 2==1
+
+m <- matrix(1:6, nrow=3)
+# return rows where value in first column is greater than 1 and value in 2nd
+# column is greater than 5
+# returrnly only last row
+
+# must use &, the vector Boolean and operator, && wouldn't work 
+m[m[, 1] > 1 & m[,2] > 5,]
+
+# funky weird output
+m[m[, 1] > 1 && m[,2] > 5,]
+
+# matrices are also vectors, so we can do vector like things to it. The matrix 
+# is column oriented
+m <- matrix(c(5, 2, 9, -1, 10, 11), nrow=3)
+which(m > 2)
+
+# *************** Ch 3.2.5 Extended Ex: Generating a Covariance Matrix *******
+# Demonstrates R's row() and col() functions
+# row(a[2,8]) will return the row number of that element a, which is 2
+a <- matrix(1:100, nrow=10)
+
+
+# TODO: this does not work. tell author, top of page 69
+row(a[2, 8])
+row(a)
+
+# Lets consider an example. When writing simulatinon code for multi-variate
+# normal distributions - for instance, using mvrnorm() from the MASS library -
+# we need to specify a covariance matrix. The key point for our purposes here is
+# that the matrix is symmetric; for example the element in row1 , col2 is equal
+# to the element in row2, col1
+
+# Suppose we are working with a n-variate normal distribution. Our matrix will
+# have n rows and n columns, and we wish each of the n variables to have
+# variance 1, with correlation ρ (rho) between pairs of variabeles. 
+# For n=3, and ρ=0.2, for example, the desired matrix is as follows
+
+# ( 1 0.2 0.2
+# 0.2   1 0.2
+# 0.2 0.2   1)
+
+# Here's the code to generate this kind of matrix
+
+makecov <- function(rho, n) {
+    m <- matrix(nrow=n, ncol=n)
+    m <- ifelse(row(m) == col(m), 1, rho)
+    return(m)
+}
