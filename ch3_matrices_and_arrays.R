@@ -89,8 +89,6 @@ blurpart <- function(img, rows, cols, q) {
     lrows <- length(rows)
     lcols <- length(cols)
     newimg <- img
-    # TODO: send typo correction to author
-    # TODO: send function correction to author
     randomnoise <- matrix(nrow=lrows, ncol=lcols, runif(lrows*lcols))
     newimg@grey[rows, cols] <- randomnoise
     newimg@grey <- (1-q)*img@grey + q*newimg@grey
@@ -128,7 +126,6 @@ z <- c(5, 12, 13)
 # 1 2 
 # 3 4
 
-# TODO: send author correction of example on top of page 68
 x[z %% 2 ==1, ]
 z %% 2==1
 
@@ -154,7 +151,6 @@ which(m > 2)
 a <- matrix(1:100, nrow=10)
 
 
-# TODO: this does not work. tell author, top of page 69
 # row(a[2, 8])
 row(a)
 
@@ -234,10 +230,6 @@ yt <- t(apply(z, 1, f))
 # For each row of the  matrix, the corresponding element of the vector will be
 # either 1 or 0, depending on whether the majority of the first d elements in
 # that row is 1 or 0. Here, d will be a parameter that we may wish to vary.
-
-# TODO: top of page 72. Not a typo, but could be confusing because the text
-# hasn't yet declared the function so a newb might wonder where the function
-# came from.
 
 copymaj <- function(rw, d) {
     maj <- sum(rw[1:d]) / d
@@ -342,7 +334,6 @@ all(q == t(q))
 
 mind(q)
 
-# TODO: typo page 77, number one should be letter l. see notes in book
 # if minimal element in the matrix is unique, there is an alternate approach
 # that is far simpler
 minda <- function(d) {
