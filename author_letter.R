@@ -25,6 +25,8 @@ randomnoise <- matrix(nrow=lrows, ncol=lcols, runif(lrows*lcols))
 # dimension size mismatch
 newimg@grey[rows, cols] <- randomnoise
 newimg@grey <- (1-q) * img@grey + q * randomnoise
+# above two lines not required only need
+newimg@grey[rows,cols] <- (1-q) * img@grey[rows,cols] + q * randomnoise
 
 # Chapter 3
 # Page bottom of page 67 to top of page 68
